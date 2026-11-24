@@ -1,16 +1,70 @@
-# React + Vite
+# Task Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Учебное веб-приложение для управления списком задач на **React** и **Vite**.
 
-Currently, two official plugins are available:
+## Возможности
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Просмотр списка задач со статусами (`выполнена` / `в работе`).
+- Добавление новых задач через управляемую форму (по кнопке или клавише `Enter`, с защитой от пустого ввода).
+- Переключение статуса задачи («Выполнить» / «Вернуть в работу»).
+- Удаление отдельной задачи.
+- Массовые действия: «Удалить выполненные» и «Очистить список».
+- Фильтрация списка: **Все**, **Выполненные**, **Невыполненные** (без удаления исходных данных).
+- Общая статистика (количество всех и выполненных задач считается по полному списку).
+- Раздельные пустые состояния: «Задач пока нет» и «Нет задач по выбранному фильтру».
 
-## React Compiler
+## Стек технологий
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React 19** (функциональные компоненты, `useState`, `props`)
+- **Vite 8** (сборка и dev-сервер)
+- **Oxlint** (проверка качества кода)
+- **CSS** (оформление без сторонних UI-библиотек)
 
-## Expanding the Oxlint configuration
+## Архитектура и макет
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+![Архитектура и макет Task Manager](docs/architecture.png)
+
+- Исходная схема для редактирования: [docs/architecture.excalidraw](docs/architecture.excalidraw) *(открывается в WebStorm через плагин Excalidraw или на [excalidraw.com](https://excalidraw.com))*
+- Техническое задание: [docs/SPEC.md](docs/SPEC.md)
+
+## Структура проекта
+
+```text
+task-manager/
+├── docs/
+│   ├── SPEC.md                   # Техническое задание
+│   ├── architecture.excalidraw   # Исходная схема в Excalidraw
+│   └── architecture.png          # Графическая схема архитектуры и макета
+├── src/
+│   ├── components/
+│   │   ├── Header.jsx            # Заголовок приложения
+│   │   ├── TaskStatistics.jsx    # Счётчик всех и выполненных задач
+│   │   ├── TaskList.jsx          # Список задач и пустые состояния
+│   │   ├── TaskItem.jsx          # Карточка одной задачи
+│   │   └── Footer.jsx            # Подвал приложения
+│   ├── data/
+│   │   └── initialTasks.js       # Стартовый массив задач
+│   ├── App.jsx                   # Корневой компонент, состояние и логика
+│   ├── App.css                   # Стили приложения
+│   ├── index.css                 # Базовый сброс стилей
+│   └── main.jsx                  # Точка входа
+├── index.html
+└── package.json
+```
+
+## Установка и запуск
+
+```bash
+# 1. Установить зависимости
+npm install
+
+# 2. Запустить локальный сервер разработки
+npm run dev
+```
+
+### Доступные скрипты
+
+- `npm run dev` — запуск dev-сервера Vite с HMR.
+- `npm run build` — сборка production-версии в папку `dist/`.
+- `npm run preview` — локальный предпросмотр собранного проекта.
+- `npm run lint` — проверка кода линтером `oxlint`.

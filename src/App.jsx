@@ -1,121 +1,173 @@
 import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import { initialTasks } from './data/initialTasks'
+import Header from './components/Header'
+import TaskStatistics from './components/TaskStatistics'
+import TaskList from './components/TaskList'
+import Footer from './components/Footer'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  // Основное состояние списка задач, активного фильтра и текста новой задачи
+  const [tasks, setTasks] = useState(initialTasks)
+  const [filter, setFilter] = useState('all')
+  const [newTaskTitle, setNewTaskTitle] = useState('')
+
+  // Добавление новой задачи из поля ввода
+  function handleAddTask(event) {
+    event.preventDefault()
+
+    const trimmedTitle = newTaskTitle.trim()
+    if (!trimmedTitle) return
+
+    setTasks((prevTasks) => {
+      const nextId =
+        prevTasks.length > 0
+          ? Math.max(...prevTasks.map((task) => task.id)) + 1
+          : 1
+
+      const newTask = {
+        id: nextId,
+        title: trimmedTitle,
+        completed: false,
+      }
+
+      return [...prevTasks, newTask]
+    })
+
+    // Очищаем поле ввода после добавления
+    setNewTaskTitle('')
+  }
+
+  // Удаление одной задачи по её id
+  function handleDeleteTask(id) {
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id))
+  }
+
+  // Переключение статуса задачи (выполнена / в работе)
+  function handleToggleTask(id) {
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task,
+      ),
+    )
+  }
+
+  // Удаление только выполненных задач
+  function handleClearCompleted() {
+    setTasks((prevTasks) => prevTasks.filter((task) => !task.completed))
+  }
+
+  // Полная очистка списка
+  function handleClearAll() {
+    setTasks([])
+  }
+
+  // Общая статистика всегда считается по всем задачам, а не по фильтру
+  const totalCount = tasks.length
+  const completedCount = tasks.filter((task) => task.completed).length
+
+  // Вычисляем видимый список задач без изменения исходного массива
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === 'completed') return task.completed
+    if (filter === 'active') return !task.completed
+    return true
+  })
+
+  // Сообщение для пустого состояния зависит от причины пустоты
+  const emptyMessage =
+    tasks.length === 0 ? 'Задач пока нет' : 'Нет задач по выбранному фильтру'
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app">
+      <div className="app-container">
+        <Header />
 
-      <div className="ticks"></div>
+        <main className="app-main">
+          <TaskStatistics
+            totalCount={totalCount}
+            completedCount={completedCount}
+          />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          {/* Форма добавления новой задачи */}
+          <form className="task-form" onSubmit={handleAddTask}>
+            <input
+              type="text"
+              className="task-input"
+              placeholder="Введите название новой задачи..."
+              value={newTaskTitle}
+              onChange={(event) => setNewTaskTitle(event.target.value)}
+            />
+            <button
+              type="submit"
+              className="btn btn-add"
+              disabled={!newTaskTitle.trim()}
+            >
+              + Добавить задачу
+            </button>
+          </form>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+          {/* Кнопки фильтрации задач */}
+          <div className="filter-group">
+            <button
+              type="button"
+              className={`btn btn-filter ${
+                filter === 'all' ? 'btn-filter-active' : ''
+              }`}
+              onClick={() => setFilter('all')}
+            >
+              Все
+            </button>
+            <button
+              type="button"
+              className={`btn btn-filter ${
+                filter === 'completed' ? 'btn-filter-active' : ''
+              }`}
+              onClick={() => setFilter('completed')}
+            >
+              Выполненные
+            </button>
+            <button
+              type="button"
+              className={`btn btn-filter ${
+                filter === 'active' ? 'btn-filter-active' : ''
+              }`}
+              onClick={() => setFilter('active')}
+            >
+              Невыполненные
+            </button>
+          </div>
+
+          <TaskList
+            tasks={filteredTasks}
+            emptyMessage={emptyMessage}
+            onToggleTask={handleToggleTask}
+            onDeleteTask={handleDeleteTask}
+          />
+
+          {/* Кнопки массовой очистки задач */}
+          <div className="bulk-actions">
+            <button
+              type="button"
+              className="btn btn-clear-done"
+              onClick={handleClearCompleted}
+              disabled={completedCount === 0}
+            >
+              Удалить выполненные
+            </button>
+            <button
+              type="button"
+              className="btn btn-clear-all"
+              onClick={handleClearAll}
+              disabled={totalCount === 0}
+            >
+              Очистить список
+            </button>
+          </div>
+        </main>
+
+        <Footer />
+      </div>
+    </div>
   )
 }
 
